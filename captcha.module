@@ -107,6 +107,27 @@ function captcha_menu() {
 }
 
 /**
+ * Implements hook_entity_info().
+ */
+function captcha_entity_info() {
+  return array(
+    'captcha_point' => array(
+      'label' => t('Captcha Points'),
+      'entity class' => 'CaptchaPoint',
+      'controller class' => 'EntityAPIControllerExportable',
+      'base table' => 'captcha_points',
+      'fieldable' => FALSE,
+      'exportable' => TRUE,
+      'entity keys' => array(
+        'id' => 'id',
+        'name' => 'form_id',
+        'module' => 'export_module',
+      ),
+    ),
+  );
+}
+
+/**
  * Implementation of hook_permission().
  */
 function captcha_permission() {

@@ -13,6 +13,11 @@ function captcha_schema() {
   $schema['captcha_points'] = array(
     'description' => 'This table describes which challenges should be added to which forms.',
     'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique captcha type ID.',
+      ),
       'form_id' => array(
         'description' => 'The form_id of the form to add a CAPTCHA to.',
         'type' => 'varchar',
@@ -30,8 +35,26 @@ function captcha_schema() {
         'type' => 'varchar',
         'length' => 64,
       ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        // Set the default to ENTITY_CUSTOM without using the constant as it is
+        // not safe to use it at this point.
+        'default' => 0x01,
+        'size' => 'tiny',
+        'description' => 'The exportable status of the entity.',
+      ),
+      'export_module' => array(
+        'description' => 'The name of the providing module if the entity has been defined in code.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
     ),
-    'primary key' => array('form_id'),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'form_id' => array('form_id'),
+    ),
   );
   // Table for the CAPTCHA sessions.
   $schema['captcha_sessions'] = array(
@@ -333,4 +356,49 @@ function captcha_update_7000() {
       ->condition('form_id', 'comment_form')
       ->execute();
   }
+}
+
+/**
+ * Add entity fields
+ */
+function captcha_update_7101(&$sand) {
+  $new_fields = array(
+    'status' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      // Set the default to ENTITY_CUSTOM without using the constant as it is
+      // not safe to use it at this point.
+      'default' => 0x01,
+      'size' => 'tiny',
+      'description' => 'The exportable status of the entity.',
+    ),
+    'export_module' => array(
+      'description' => 'The name of the providing module if the entity has been defined in code.',
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    ),
+  );
+
+  $table = 'captcha_points';
+
+  // Remove primary key
+  db_drop_primary_key($table);
+
+  // id field is special
+  db_add_field($table, 'id', array(
+      'type' => 'serial',
+      'not null' => TRUE,
+      'description' => 'Primary Key: Unique captcha type ID.',
+    ),
+    array('primary key' => array('id'))
+  );
+
+  // Add the new fields
+  foreach ($new_fields as $field_id => $field_schema) {
+    db_add_field($table, $field_id, $field_schema);
+  }
+
+  // Add the new name key
+  db_add_unique_key($table, 'form_id', array('form_id'));
 }

@@ -18,38 +18,42 @@
  * @return nothing
  */
 function captcha_set_form_id_setting($form_id, $captcha_type) {
+  // Does the current entity if it exists
+  if ($captcha_point = entity_load('captcha_point', $form_id)) {
+    $captcha_point->captcha_type = $captcha_type;
+  }
+  else {
+    $captcha_point = new CaptchaPoint(array('form_id' => $form_id));
+  }
+
   // Handle 'none'.
   if ($captcha_type == 'none') {
-    db_merge('captcha_points')
-      ->key(array('form_id' => $form_id))
-      ->fields(array('module' => NULL, 'captcha_type' => NULL))
-      ->execute();
+    $captcha_point->module = NULL;
+    $captcha_point->captcha_type = NULL;
+    $captcha_point->save();
   }
   // Handle 'default'.
   elseif ($captcha_type == 'default') {
-    db_merge('captcha_points')
-      ->key(array('form_id' => $form_id))
-      ->fields(array('module' => NULL, 'captcha_type' => 'default'))
-      ->execute();
+    $captcha_point->module = NULL;
+    $captcha_point->captcha_type = 'default';
+    $captcha_point->save();
   }
   // Handle NULL.
   elseif ($captcha_type == NULL) {
-    db_delete('captcha_points')->condition('form_id', $form_id)->execute();
+    $captcha_point->delete();
   }
   // Handle a captcha_type object.
   elseif (is_object($captcha_type) && isset($captcha_type->module) && isset($captcha_type->captcha_type)) {
-    db_merge('captcha_points')
-      ->key(array('form_id' => $form_id))
-      ->fields(array('module' => $captcha_type->module, 'captcha_type' => $captcha_type->captcha_type))
-      ->execute();
+    $captcha_point->captcha_type = $captcha_type->captcha_type;
+    $captcha_point->module = $captcha_type->module;
+    $captcha_point->save();
   }
   // Handle a captcha_type string.
   elseif (is_string($captcha_type) && substr_count($captcha_type, '/') == 1) {
     list($module, $type) = explode('/', $captcha_type);
-    db_merge('captcha_points')
-      ->key(array('form_id' => $form_id))
-      ->fields(array('module' => $module, 'captcha_type' => $type))
-      ->execute();
+    $captcha_point->captcha_type = $type;
+    $captcha_point->module = $module;
+    $captcha_point->save();
   }
   else {
     drupal_set_message(t('Failed to set a CAPTCHA type for form %form_id: could not interpret value "@captcha_type"',
@@ -69,16 +73,13 @@ function captcha_set_form_id_setting($form_id, $captcha_type) {
  *   or in the form 'captcha/Math'.
  */
 function captcha_get_form_id_setting($form_id, $symbolic=FALSE) {
-  // Fetch setting from database.
-  $result = db_query("SELECT module, captcha_type FROM {captcha_points} WHERE form_id = :form_id",
-    array(':form_id' =>  $form_id));
-  $captcha_point = $result->fetchObject();
+  $captcha_point = entity_load('captcha_point', $form_id);
 
   // If no setting is available in database for the given form,
   // but 'captcha_default_challenge_on_nonlisted_forms' is enabled, pick the default type anyway
   if (!$captcha_point && variable_get('captcha_default_challenge_on_nonlisted_forms', FALSE))
   {
-    $captcha_point = (object) array('captcha_type' => 'default');
+    $captcha_point = new CaptchaPoint(array('captcha_type' => 'default'));
   }
 
   // Handle (default) settings and symbolic mode.
@@ -392,3 +393,13 @@ function _captcha_insert_captcha_element(&$form, $placement, $captcha_element) {
   }
 }
 
+class CaptchaPoint extends Entity {
+  public $form_id;
+  public $module;
+  public $export_module;
+  public $captcha_type;
+
+  public function __construct(array $values = array()) {
+    parent::__construct($values, 'captcha_point');
+  }
+}
