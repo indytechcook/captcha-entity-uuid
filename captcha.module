@@ -122,6 +122,7 @@ function captcha_entity_info() {
         'id' => 'id',
         'name' => 'form_id',
         'module' => 'export_module',
+        'label' => 'form_id',
       ),
     ),
   );

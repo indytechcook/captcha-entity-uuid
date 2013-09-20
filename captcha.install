@@ -168,13 +168,14 @@ function captcha_install() {
     $form_ids[] = 'comment_node_' . $type . '_form';
   }
   foreach ($form_ids as $form_id) {
-    db_insert('captcha_points')
-      ->fields(array(
+    entity_create('captcha_point',
+      array(
         'form_id' => $form_id,
         'module' => NULL,
-        'captcha_type' => NULL,
-      ))
-      ->execute();
+        'captcha_type' => NULL
+      )
+    )->save();
+
   }
 
   // Be friendly to your users: what to do after install?

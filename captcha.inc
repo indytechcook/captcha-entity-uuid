@@ -397,7 +397,7 @@ function captcha_point_load($form_id) {
     return reset($captcha_point);
   }
   else {
-    return new CaptchaPoint(array('form_id' => $form_id));
+    return entity_create('captcha_point', array('form_id' => $form_id));
   }
 }
 

@@ -63,7 +63,7 @@ function captcha_admin_settings() {
   );
   $form['captcha_form_protection']['captcha_form_id_overview']['captcha_captcha_points'] = array();
   $captcha_type_options = _captcha_available_challenge_types();
-  $result = db_select('captcha_points', 'cp')->fields('cp')->orderBy('form_id')->execute();
+  $result = entity_load_multiple_by_name('captcha_point');
   foreach ($result as $captcha_point) {
     $form['captcha_form_protection']['captcha_form_id_overview']['captcha_captcha_points'][$captcha_point->form_id] = array();
     $form['captcha_form_protection']['captcha_form_id_overview']['captcha_captcha_points'][$captcha_point->form_id]['form_id'] = array(
