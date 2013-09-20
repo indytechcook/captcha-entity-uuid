@@ -18,13 +18,8 @@
  * @return nothing
  */
 function captcha_set_form_id_setting($form_id, $captcha_type) {
-  // Does the current entity if it exists
-  if ($captcha_point = entity_load('captcha_point', $form_id)) {
-    $captcha_point->captcha_type = $captcha_type;
-  }
-  else {
-    $captcha_point = new CaptchaPoint(array('form_id' => $form_id));
-  }
+  // Load the Captcha point
+  $captcha_point = captcha_point_load($form_id);
 
   // Handle 'none'.
   if ($captcha_type == 'none') {
@@ -73,7 +68,8 @@ function captcha_set_form_id_setting($form_id, $captcha_type) {
  *   or in the form 'captcha/Math'.
  */
 function captcha_get_form_id_setting($form_id, $symbolic=FALSE) {
-  $captcha_point = entity_load('captcha_point', $form_id);
+  // Load the Captcha point
+  $captcha_point = captcha_point_load($form_id);
 
   // If no setting is available in database for the given form,
   // but 'captcha_default_challenge_on_nonlisted_forms' is enabled, pick the default type anyway
@@ -390,6 +386,18 @@ function _captcha_insert_captcha_element(&$form, $placement, $captcha_element) {
         $form_stepper[$k] = $v;
       }
     }
+  }
+}
+
+/**
+ * Helper function to load teh CaptchaPoint entity
+ */
+function captcha_point_load($form_id) {
+  if ($captcha_point = entity_load('captcha_point', array($form_id))) {
+    return reset($captcha_point);
+  }
+  else {
+    return new CaptchaPoint(array('form_id' => $form_id));
   }
 }
 
