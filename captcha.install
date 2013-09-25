@@ -157,6 +157,7 @@ function captcha_requirements($phase) {
  */
 function captcha_install() {
   $t = get_t();
+  /*
   // Insert some default CAPTCHA points.
   $form_ids = array(
     'contact_site_form', 'contact_personal_form',
@@ -176,7 +177,7 @@ function captcha_install() {
       )
     )->save();
 
-  }
+  }*/
 
   // Be friendly to your users: what to do after install?
   drupal_set_message($t('You can now <a href="!captcha_admin">configure the CAPTCHA module</a> for your site.',
@@ -402,4 +403,16 @@ function captcha_update_7101(&$sand) {
 
   // Add the new name key
   db_add_unique_key($table, 'form_id', array('form_id'));
+}
+
+/**
+ * Remove default table entries
+ */
+function captcha_update_7102(&$sand) {
+  // If the capctha type if nul then this is a
+  //default and covered in the default hook
+
+  db_delete('captcha_points')
+    ->condition('captcha_type', NULL)
+    ->execute();
 }

@@ -771,3 +771,65 @@ function captcha_modules_enabled() {
   // new hook_captcha_placement_map hooks can be triggered.
   variable_del('captcha_placement_map_cache');
 }
+
+/**
+ * Implements hook_default_captcha_point().
+ */
+function captcha_default_captcha_point() {
+  $items = array();
+  $items['comment_node_article_form'] = entity_import('captcha_point', '{
+    "form_id" : "comment_node_article_form",
+    "module" : null,
+    "captcha_type" : null,
+    "rdf_mapping" : []
+  }');
+  $items['comment_node_page_form'] = entity_import('captcha_point', '{
+    "form_id" : "comment_node_page_form",
+    "module" : null,
+    "captcha_type" : null,
+    "rdf_mapping" : []
+  }');
+  $items['contact_personal_form'] = entity_import('captcha_point', '{
+    "form_id" : "contact_personal_form",
+    "module" : null,
+    "captcha_type" : null,
+    "rdf_mapping" : []
+  }');
+  $items['contact_site_form'] = entity_import('captcha_point', '{
+    "form_id" : "contact_site_form",
+    "module" : null,
+    "captcha_type" : null,
+    "rdf_mapping" : []
+  }');
+  $items['forum_node_form'] = entity_import('captcha_point', '{
+    "form_id" : "forum_node_form",
+    "module" : null,
+    "captcha_type" : null,
+    "rdf_mapping" : []
+  }');
+  $items['user_login'] = entity_import('captcha_point', '{
+    "form_id" : "user_login",
+    "module" : null,
+    "captcha_type" : null,
+    "rdf_mapping" : []
+  }');
+  $items['user_login_block'] = entity_import('captcha_point', '{
+    "form_id" : "user_login_block",
+    "module" : null,
+    "captcha_type" : null,
+    "rdf_mapping" : []
+  }');
+  $items['user_pass'] = entity_import('captcha_point', '{
+    "form_id" : "user_pass",
+    "module" : null,
+    "captcha_type" : null,
+    "rdf_mapping" : []
+  }');
+  $items['user_register_form'] = entity_import('captcha_point', '{
+    "form_id" : "user_register_form",
+    "module" : null,
+    "captcha_type" : null,
+    "rdf_mapping" : []
+  }');
+  return $items;
+}
