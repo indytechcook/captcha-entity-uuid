@@ -67,15 +67,19 @@ function captcha_set_form_id_setting($form_id, $captcha_type) {
  *   If argument $symbolic is true, returns (symbolic) as 'none', 'default'
  *   or in the form 'captcha/Math'.
  */
-function captcha_get_form_id_setting($form_id, $symbolic=FALSE) {
+function captcha_get_form_id_setting($form_id, $symbolic = FALSE, $reset = FALSE) {
   // Load the Captcha point
-  $captcha_point = captcha_point_load($form_id);
+  $captcha_point = captcha_point_load($form_id, $reset);
 
   // If no setting is available in database for the given form,
   // but 'captcha_default_challenge_on_nonlisted_forms' is enabled, pick the default type anyway
-  if (!$captcha_point && variable_get('captcha_default_challenge_on_nonlisted_forms', FALSE))
-  {
-    $captcha_point = new CaptchaPoint(array('captcha_type' => 'default'));
+  if (isset($captcha_point->is_new)) {
+    if (variable_get('captcha_default_challenge_on_nonlisted_forms', FALSE)) {
+      $captcha_point->captcha_type = 'default';
+    }
+    else {
+      $captcha_point = NULL;
+    }
   }
 
   // Handle (default) settings and symbolic mode.
@@ -390,10 +394,10 @@ function _captcha_insert_captcha_element(&$form, $placement, $captcha_element) {
 }
 
 /**
- * Helper function to load teh CaptchaPoint entity
+ * Helper function to load the CaptchaPoint entity
  */
-function captcha_point_load($form_id) {
-  if ($captcha_point = entity_load('captcha_point', array($form_id))) {
+function captcha_point_load($form_id, $reset = FALSE) {
+  if ($captcha_point = entity_load('captcha_point', array($form_id), array(), $reset)) {
     return reset($captcha_point);
   }
   else {
